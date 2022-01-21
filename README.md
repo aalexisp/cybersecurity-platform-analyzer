@@ -1,6 +1,5 @@
 <div id="top"></div>
 
-<div align="center"></div>
 <!-- PROJECT SHIELDS -->
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
