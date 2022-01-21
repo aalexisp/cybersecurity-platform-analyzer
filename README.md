@@ -1,14 +1,13 @@
 <div id="top"></div>
 
-<div align="center">
-  <!-- PROJECT SHIELDS -->
-  [![Contributors][contributors-shield]][contributors-url]
-  [![Forks][forks-shield]][forks-url]
-  [![Stargazers][stars-shield]][stars-url]
-  [![Issues][issues-shield]][issues-url]
-  [![MIT License][license-shield]][license-url]
-  [![LinkedIn][linkedin-shield]][linkedin-url]
-</div>
+<div align="center"></div>
+<!-- PROJECT SHIELDS -->
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
   
 <!-- PROJECT LOGO -->
 <br />
