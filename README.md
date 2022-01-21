@@ -1,1 +1,1 @@
-# cybersecurity-platfrom-analyzer
+# cybersecurity-platfm-analyzer
