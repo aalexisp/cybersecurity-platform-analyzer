@@ -92,7 +92,7 @@ These are the initial technologies that the project is going to have.
 * [Docker](https://www.docker.com/)
 * [GraphQL](https://graphql.org/)
 
-<p align="right">(<a href="#top">^</a>)</p>
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 
 
