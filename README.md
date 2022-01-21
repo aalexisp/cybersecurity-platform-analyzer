@@ -15,7 +15,7 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
-  <h3 align="center">#Cybersecurity-Platform-Analyzer</h3>
+  <h3 align="center">Cybersecurity-Platform-Analyzer</h3>
 
   <p align="center">
     An awesome cybersecurity platform analyzer for your business
