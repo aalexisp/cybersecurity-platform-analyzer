@@ -64,20 +64,16 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://www.upc.edu/ca)
 
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+The initial work of this project is being developed by 4 students of the **Barcelona School of Informatics FIB** for their final degree project.
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should implement DRY principles to the rest of your life :smile:
+The main ideas of this project are:
+* Idea 1
+* Idea 2
+* Idea 3
 
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
-
-Use the `BLANK_README.md` to get started.
+This is of course how the application works in a first instance but in order to see the real usage in more detail you can check out our documentation.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 ### Built With
 
