@@ -81,7 +81,7 @@ Use the `BLANK_README.md` to get started.
 
 ### Built With
 
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
+These are the initial technologies that the project is going to have.
 
 * [Golang](https://go.dev/)
 * [Ansible](https://www.ansible.com/)
@@ -90,9 +90,9 @@ This section should list any major frameworks/libraries used to bootstrap your p
 * [RabbitMQ](https://www.rabbitmq.com/)
 * [MongoDB](https://www.mongodb.com/)
 * [Docker](https://www.docker.com/)
-* [Kali](https://www.kali.org/)
+* [GraphQL](https://graphql.org/)
 
-<p align="right">(<a href="#top">back to top</a>)</p>
+<p align="right">(<a href="#top">^</a>)</p>
 
 
 
