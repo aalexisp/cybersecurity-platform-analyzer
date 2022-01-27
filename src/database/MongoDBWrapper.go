@@ -12,9 +12,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Connect_localhost(URI string) *mongo.Client {
-	clientOptions := options.Client().ApplyURI(URI)
+func Connect_localhost(URI string, user string, password string) *mongo.Client {
 
+	credential := options.Credential{
+		Username: user,
+		Password: password,
+	}
+	//check Authentication 
+	clientOptions := options.Client().ApplyURI(URI).SetAuth(credential)
+	
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
@@ -49,7 +55,7 @@ func Connect_client(user string, password string, database string) *mongo.Client
 	}
 	return client //succeeded
 }
-type MongoFields struct { //fields for demo2
+type MongoFields struct { //fields for demo2 collection
 	ID int
 	FieldStr string
 	FieldInt int
