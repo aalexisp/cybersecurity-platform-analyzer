@@ -15,7 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Connect_localhost(URI string, user string, password string) *mongo.Client {
+func Connect_localhost(port string, user string, password string) *mongo.Client {
 
 	credential := options.Credential{
 		Username: user,
@@ -23,7 +23,7 @@ func Connect_localhost(URI string, user string, password string) *mongo.Client {
 	}
 	//check authentication
 
-	clientOptions := options.Client().ApplyURI(URI).SetAuth(credential)
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:" + port).SetAuth(credential)
 	
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
@@ -41,9 +41,9 @@ func Connect_localhost(URI string, user string, password string) *mongo.Client {
 	return client //succeeded
 }
 
-func Connect_cluster(user string, password string, database string) *mongo.Client{
+func Connect_cluster(user string, password string, database string, domain string) *mongo.Client{
 
-	clientOptions := options.Client().ApplyURI("mongodb+srv://" + user + ":" + password + "@" + database + ".wmy67.mongodb.net/Cluster0?retryWrites=true&w=majority")
+	clientOptions := options.Client().ApplyURI("mongodb+srv://" + user + ":" + password + "@" + database + domain)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err := mongo.Connect(ctx, clientOptions)
