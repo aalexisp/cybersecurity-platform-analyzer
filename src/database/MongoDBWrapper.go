@@ -12,6 +12,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"encoding/json"
 	"go.mongodb.org/mongo-driver/mongo"
+//	"gopkg.in/mgo.v2"
+//	"gopkg.in/mgo.v2/bson"
+//	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -62,7 +65,7 @@ func Connect_cluster(user string, password string, database string, domain strin
 
 type MongoFields struct {
 
-	ID int `json:"_id"`
+	ID string `json:"id"`
 	FieldStr string `json:"Field Str"`
 	FieldInt int `json:"Field Int"`
 	FieldBool bool `json:"Field Bool"`
@@ -75,26 +78,56 @@ func Disconnect(client *mongo.Client){
 		log.Fatal(err)
 	}
 }
+type Filters struct{
+	Filter string
+	Value string
+	Op string
+}
+type Client_Info struct{
+	Client *mongo.Client
+	Database string
+	Col string
 
-func Insert_to_collection(client *mongo.Client, database string, col string, path string) bool{
-	
+}
+func Get_documents(info *Client_Info, fil *[]Filters){
+	collection := (*info).Client.Database((*info).Database).Collection((*info).Col)
+	var query []bson.M
+	for i:= 0;  i<len(*fil); i++ {
+		query = append(query, bson.M{"$match": bson.M{(*fil)[i].Filter: bson.M{ (*fil)[i].Op : (*fil)[i].Value}}}) 
+	}
+
+	cursor, err := collection.Aggregate(context.TODO(), query)
+    	if err != nil {
+        	log.Fatal(err)
+   	 }
+    	
+	var docsFiltered []bson.M
+	if err = cursor.All(context.TODO(), &docsFiltered); err != nil {
+    		log.Fatal(err)
+	}
+	fmt.Println(docsFiltered)
+}
+
+func Insert_to_collection(info *Client_Info, path string) bool{
+
+	collection := (*info).Client.Database((*info).Database).Collection((*info).Col)
+
 	docsPath, _ := filepath.Abs(path)
 	byteValues, err := ioutil.ReadFile(docsPath)
 	if err != nil{
 		log.Fatal(err) //file doesn't exist
 		return false
 	}
-	if col != "DEMO2" {
+	if (*info).Col != "DEMO3" {
 		fmt.Println("collection doesn't exist")
 		return false
 	}
-	var docs []MongoFields
+	var docs  []MongoFields
 	err = json.Unmarshal(byteValues, &docs)
 	if err != nil{
 		log.Fatal(err) //structure is bad
 		return false
 	}
-	collection := client.Database(database).Collection(col)
 
 	for i := range docs {
 		doc := docs[i]
@@ -108,12 +141,12 @@ func Insert_to_collection(client *mongo.Client, database string, col string, pat
 	return true //succeeded to insert
 }
 //de moment tots els value son string, nose si necesitem altres tipus
-func Delete_documents(client *mongo.Client, database string, col string, filter string, value string) bool{
+func Delete_documents(info *Client_Info, filter string, value string) bool{
 
-	collection := client.Database(database).Collection(col)
+	collection := (*info).Client.Database((*info).Database).Collection((*info).Col)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-
+	
 	res, err := collection.DeleteMany(ctx, bson.M{ filter : value })
 	if err != nil {
  		log.Fatal(err)
@@ -123,9 +156,9 @@ func Delete_documents(client *mongo.Client, database string, col string, filter 
 	return true //succeeded to delete
 }
 
-func Update_documents(client *mongo.Client, database string, col string, filter string, filter_value string,update_Param string, update_value string) bool {
+func Update_documents(info *Client_Info, filter string, filter_value string,update_Param string, update_value string) bool {
 
-	collection := client.Database(database).Collection(col)
+	collection := (*info).Client.Database((*info).Database).Collection((*info).Col)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
