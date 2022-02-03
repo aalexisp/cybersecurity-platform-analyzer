@@ -17,7 +17,27 @@ import (
 	"syscall"
  )
 
-func Connect(portdomain string, user string, database string) *mongo.Client {
+type Role struct {
+    Role string `json:"role"`
+    Db   string `json:"db"`
+}
+func Add_user(client *mongo.Client, username string, password string, rols *[]Role){
+
+	var rol []bson.M //createUsers
+	for i:= 0;  i<len(*rols); i++ {
+		rol = append(rol, bson.M{ "role": (*rols)[i].Role, "db" : (*rols)[i].Db})
+	}
+	//we create user in admin database -> we use admin database to auth 
+	r := client.Database("admin").RunCommand(context.Background(),bson.D{{"createUser", username},{"pwd", password}, {"roles", rol }})
+
+	if r.Err() != nil {
+		panic(r.Err())
+	}
+
+}
+
+
+func Connect(portdomain string, user string, database string, localhost bool) *mongo.Client {
 
 	var clientOptions *options.ClientOptions
 
@@ -27,20 +47,22 @@ func Connect(portdomain string, user string, database string) *mongo.Client {
 		return nil
 	}
 
-	if(database == ""){
+	if(localhost == true){
 		credential := options.Credential{
 			Username: user,
 			Password: string(password),
 		}
 		//check authentication
 
-		clientOptions = options.Client().ApplyURI("mongodb://localhost:" + portdomain).SetAuth(credential)
+		clientOptions = options.Client().ApplyURI("mongodb://localhost:" + portdomain + "/" + database).SetAuth(credential)
 	}else{
 
 		clientOptions = options.Client().ApplyURI("mongodb+srv://" + user + ":" + string(password) + "@" + database + portdomain)
 
 	}
-	client, err := mongo.Connect(context.TODO(), clientOptions)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()	
+	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
 		log.Fatal(err)
 		return nil //failed
@@ -56,13 +78,20 @@ func Connect(portdomain string, user string, database string) *mongo.Client {
 	return client //succeeded
 }
 
-
-type MongoFields struct {
-
-	ID string `json:"id"`
-	FieldStr string `json:"Field Str"`
-	FieldInt int `json:"Field Int"`
-	FieldBool bool `json:"Field Bool"`
+type Machine_definitions struct {
+	ID                string `json:"Id"`
+	Type              string `json:"Type"`
+	Name              string `json:"Name"`
+	HostIP            string `json:"Host-ip"`
+	BoxSpecifications struct {
+		CPU      string `json:"Cpu"`
+		RAM      string `json:"Ram"`
+		Provider string `json:"Provider"`
+		TTL      string `json:"Ttl"`
+		BoxIP    string `json:"Box-ip"`
+		Gui      bool   `json:"Gui"`
+	} `json:"Box-specifications"`
+	Attacks []string `json:"Attacks"`
 }
 
 func Disconnect(client *mongo.Client){
@@ -112,19 +141,23 @@ func Insert_to_collection(info *Client_Info, path string) bool{
 		log.Fatal(err) //file doesn't exist
 		return false
 	}
-	if (*info).Col != "DEMO3" {
+	var Docs []Machine_definitions
+	if (*info).Col == "Machine_definitions" {
+		//var Docs []Machine_definitions
+	}else{
 		fmt.Println("collection doesn't exist")
 		return false
 	}
-	var docs  []MongoFields
-	err = json.Unmarshal(byteValues, &docs)
+	//var docs []Machine_definitions
+	//
+	err = json.Unmarshal(byteValues, &Docs)
 	if err != nil{
 		log.Fatal(err) //structure is bad
 		return false
 	}
 
-	for i := range docs {
-		doc := docs[i]
+	for i := range Docs {
+		doc := Docs[i]
 		result, err := collection.InsertOne(context.TODO(), doc)
 		if err != nil {
 			log.Fatal(err)
