@@ -7,27 +7,39 @@ import (
 	"fmt"
 	"path/filepath"
 	"io/ioutil"
-//	"reflect"
+	//"reflect"
 //	"os"
 	"go.mongodb.org/mongo-driver/bson"
 	"encoding/json"
 	"go.mongodb.org/mongo-driver/mongo"
-//	"gopkg.in/mgo.v2"
-//	"gopkg.in/mgo.v2/bson"
-//	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
-)
+	"golang.org/x/term"
+	"syscall"
+ )
 
-func Connect_localhost(port string, user string, password string) *mongo.Client {
+func Connect(portdomain string, user string, database string) *mongo.Client {
 
-	credential := options.Credential{
-		Username: user,
-		Password: password,
+	var clientOptions *options.ClientOptions
+
+	fmt.Println("Please enter the password") //get password
+	password,err :=  term.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return nil
 	}
-	//check authentication
 
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:" + port).SetAuth(credential)
-	
+	if(database == ""){
+		credential := options.Credential{
+			Username: user,
+			Password: string(password),
+		}
+		//check authentication
+
+		clientOptions = options.Client().ApplyURI("mongodb://localhost:" + portdomain).SetAuth(credential)
+	}else{
+
+		clientOptions = options.Client().ApplyURI("mongodb+srv://" + user + ":" + string(password) + "@" + database + portdomain)
+
+	}
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
@@ -44,24 +56,6 @@ func Connect_localhost(port string, user string, password string) *mongo.Client 
 	return client //succeeded
 }
 
-func Connect_cluster(user string, password string, database string, domain string) *mongo.Client{
-
-	clientOptions := options.Client().ApplyURI("mongodb+srv://" + user + ":" + password + "@" + database + domain)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	client, err := mongo.Connect(ctx, clientOptions)
-	if err != nil {
-    		log.Fatal(err)
-		return nil //failed
-	}
-	// Check the connection
-	err = client.Ping(context.TODO(), nil)
-	if err != nil {
-		log.Fatal(err)
-		return nil //failed
-	}
-	return client //succeeded
-}
 
 type MongoFields struct {
 
