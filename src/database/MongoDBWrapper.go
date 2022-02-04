@@ -15,27 +15,137 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/term"
 	"syscall"
- )
+	)
 
-type Role struct {
+type Role struct { //to add roles to the user
     Role string `json:"role"`
     Db   string `json:"db"`
 }
-func Add_user(client *mongo.Client, username string, password string, rols *[]Role){
+type Privilege struct {
+	Resource struct {
+		Db string `json:"db"`
+		Collection string `json:"collection"`
+	} `json:"resource"`
+	Actions []string `json:"actions"`
+}
+type Roles struct { //to create new roles
+	CreateRole string `json:"createRole"`
+	//db string `json:"db"`
+	Privileges []Privilege `json:"privileges"`
+	Roles []Role `json:"roles"`
 
-	var rol []bson.M //createUsers
-	for i:= 0;  i<len(*rols); i++ {
-		rol = append(rol, bson.M{ "role": (*rols)[i].Role, "db" : (*rols)[i].Db})
-	}
-	//we create user in admin database -> we use admin database to auth 
-	r := client.Database("admin").RunCommand(context.Background(),bson.D{{"createUser", username},{"pwd", password}, {"roles", rol }})
+}
+type User struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Roles []Role `json:"roles"`
+}
+type Machine_definitions struct {
+    Machine_name       string `json:"machine_name"`
+    Username          string `json:"username"`
+    Password          string `json:"password"`
+    HostIP            string `json:"Host-ip"`
+    BoxSpecifications struct {
+        CPU      string `json:"Cpu"`
+        RAM      string `json:"Ram"`
+        Provider string `json:"Provider"`
+        TTL      string `json:"Ttl"`
+        BoxIP    string `json:"Box-ip"`
+        Gui      bool   `json:"Gui"`
+    } `json:"Box-specifications"`
+}
 
-	if r.Err() != nil {
-		panic(r.Err())
-	}
+type Filters struct{
+	Filter string
+	Value string
+	Op string
+}
+type Client_Info struct{
+	Client *mongo.Client
+	Database string
+	Col string
 
 }
 
+func Add_user(client *mongo.Client, path string){
+
+	docsPath, _ := filepath.Abs(path)
+	byteValues, err := ioutil.ReadFile(docsPath)
+	if err != nil{
+		log.Fatal(err) //file doesn't exist
+	}
+	var Docs []User
+
+	err = json.Unmarshal(byteValues, &Docs)
+	if err != nil{
+		log.Fatal(err) //structure is bad
+	}
+	for i := range Docs {
+		doc := Docs[i]
+
+		var rol []bson.M //array of roles that the user has
+		for j := 0;  j < len(doc.Roles); j++ {
+			rol = append(rol, bson.M{ "role": doc.Roles[j].Role, "db" : doc.Roles[j].Db})
+		}
+		//we create user in admin database -> we use admin database to auth 
+		r := client.Database("admin").RunCommand(context.Background(),bson.D{{"createUser", doc.Username},{"pwd", doc.Password}, {"roles", rol }})
+
+		if r.Err() != nil {
+			fmt.Printf("Error creating user %s \n", doc.Username)
+			panic(r.Err())
+
+		}else{
+			fmt.Printf("User %s was created successfully \n", doc.Username)
+		}
+	}
+}
+
+func Add_role(client *mongo.Client, path string) { //path of the json file with the roles, we create the roles in the admin databse
+
+	docsPath, _ := filepath.Abs(path)
+	byteValues, err := ioutil.ReadFile(docsPath)
+	if err != nil{
+		log.Fatal(err) //file doesn't exist
+		return
+	//	return false
+	}
+	var Docs []Roles
+
+	err = json.Unmarshal(byteValues, &Docs)
+	if err != nil{
+		log.Fatal(err) //structure is bad
+		return
+	//	return false
+	}
+	for i := range Docs {
+		doc := Docs[i]
+	
+		var priv bson.A
+		for j := range doc.Privileges {//recorrer privilegios
+		
+			var act bson.A
+			for p := range doc.Privileges[j].Actions{
+				act = append(act, doc.Privileges[j].Actions[p])
+			}
+			priv = append(priv, bson.M{"resource": bson.M{ "db": doc.Privileges[j].Resource.Db,"collection": doc.Privileges[j].Resource.Collection ,}, "actions": act ,})
+
+		}
+		var rol bson.A
+		for t := range doc.Roles {
+			rol = append(rol, bson.M{"role": doc.Roles[t].Role, "db":doc.Roles[t].Db})
+		}
+	//	r := client.Database("admin").RunCommand(context.Background(), bson.D{{"createRole", "newRol"},	{"privileges", bson.A{ bson.M{ "resource": bson.M{"db": "Cluster0", "collection": "",},"actions": bson.A{"insert","dbStats","collStats","compact",},},}}, {"roles", bson.A{bson.M{"role": "readWrite", "db": "Cluster0",},},}})
+		r := client.Database("admin").RunCommand(context.Background(), bson.D{{"createRole", doc.CreateRole},{"privileges", priv}, {"roles", rol}})
+		if r.Err() != nil {
+			fmt.Println("error at runCommand")
+			panic(r.Err())
+			return
+		}else{
+			fmt.Printf("Role %s was created successfully\n ", doc.CreateRole)
+		}
+
+	}	
+}
 
 func Connect(portdomain string, user string, database string, localhost bool) *mongo.Client {
 
@@ -78,39 +188,12 @@ func Connect(portdomain string, user string, database string, localhost bool) *m
 	return client //succeeded
 }
 
-type Machine_definitions struct {
-	ID                string `json:"Id"`
-	Type              string `json:"Type"`
-	Name              string `json:"Name"`
-	HostIP            string `json:"Host-ip"`
-	BoxSpecifications struct {
-		CPU      string `json:"Cpu"`
-		RAM      string `json:"Ram"`
-		Provider string `json:"Provider"`
-		TTL      string `json:"Ttl"`
-		BoxIP    string `json:"Box-ip"`
-		Gui      bool   `json:"Gui"`
-	} `json:"Box-specifications"`
-	Attacks []string `json:"Attacks"`
-}
-
 func Disconnect(client *mongo.Client){
 
 	err := client.Disconnect(context.TODO())
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-type Filters struct{
-	Filter string
-	Value string
-	Op string
-}
-type Client_Info struct{
-	Client *mongo.Client
-	Database string
-	Col string
-
 }
 func Get_documents(info *Client_Info, fil *[]Filters){
 	collection := (*info).Client.Database((*info).Database).Collection((*info).Col)
