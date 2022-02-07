@@ -1,0 +1,45 @@
+// Copyright 2016 Yahoo Inc.
+// Licensed under the terms of the Apache version 2.0 license. See LICENSE file for terms.
+
+//Domain types
+include "Names.tdl";
+
+//Set of metadata attributes that all domains may have and can be changed.
+type DomainMeta Struct {
+    String description (optional); //a description of the domain
+    ResourceName org (optional); //a reference to an audit organization defined in athenz
+    Bool enabled (optional, default=true); //Future use only, currently not used
+    Bool auditEnabled (optional, default=false); //Flag indicates whether or not domain modifications should be logged for SOX+Auditing. If true, the auditRef parameter must be supplied(not empty) for any API defining it.
+    String account (optional); //associated aws account id (system attribute - uniqueness check)
+    Int32 ypmId (optional); //associated product id (system attribute - uniqueness check)
+    String applicationId (optional); //associated application id
+    String certDnsDomain (optional); //domain certificate dns domain (system attribute)
+    Int32 memberExpiryDays (optional); //all user members in the domain will have specified max expiry days
+    Int32 tokenExpiryMins (optional); //tokens issued for this domain will have specified max timeout in mins
+    Int32 serviceCertExpiryMins (optional); //service identity certs issued for this domain will have specified max timeout in mins
+    Int32 roleCertExpiryMins (optional); //role certs issued for this domain will have specified max timeout in mins
+    SimpleName signAlgorithm (optional); //rsa or ec signing algorithm to be used for tokens
+    Int32 serviceExpiryDays (optional); //all services in the domain roles will have specified max expiry days
+    Int32 groupExpiryDays (optional); //all groups in the domain roles will have specified max expiry days
+    String userAuthorityFilter (optional); //membership filtered based on user authority configured attributes
+    String azureSubscription (optional); //associated azure subscription id (system attribute - uniqueness check)
+    Map<CompoundName,StringList> tags (optional); //key-value pair tags, tag might contain multiple values
+    String businessService (optional); //associated business service with domain
+}
+
+//A domain is an independent partition of users, roles, and resources.
+//Its name represents the definition of a namespace; the only way a
+//new namespace can be created, from the top, is by creating Domains.
+//Administration of a domain is governed by the parent domain (using
+//reverse-DNS namespaces). The top level domains are governed by the
+//special "sys.auth" domain.
+type Domain DomainMeta {
+    DomainName name; //the common name to be referred to, the symbolic id. It is immutable
+    Timestamp modified (optional); //the last modification timestamp of any object or attribute in this domain
+    UUID id (optional); //unique identifier of the domain. generated on create, never reused
+}
+
+//A list of domain objects with their meta attributes.
+type DomainMetaList Struct {
+    Array<Domain> domains; //list of domain objects
+}

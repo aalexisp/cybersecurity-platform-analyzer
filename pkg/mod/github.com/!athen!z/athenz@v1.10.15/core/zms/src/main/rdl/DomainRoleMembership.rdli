@@ -1,0 +1,21 @@
+// Copyright 2016 Yahoo Inc.
+// Licensed under the terms of the Apache version 2.0 license. See LICENSE file for terms.
+
+//DomainRoleMembership API
+include "DomainRoleMembership.tdl";
+
+//List of domains containing roles and corresponding members to be approved by either
+//calling or specified principal
+resource DomainRoleMembership GET "/pending_members?principal={principal}" (name=getPendingDomainRoleMembersList) {
+    EntityName principal (optional); //If present, return pending list for this principal
+    authenticate;
+    exceptions {
+        ResourceError BAD_REQUEST;
+        ResourceError NOT_FOUND;
+        ResourceError FORBIDDEN;
+        ResourceError UNAUTHORIZED;
+        ResourceError TOO_MANY_REQUESTS;
+    }
+}
+
+

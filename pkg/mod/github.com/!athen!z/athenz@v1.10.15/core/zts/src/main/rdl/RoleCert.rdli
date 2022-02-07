@@ -1,0 +1,21 @@
+// Copyright 2019 Oath Holdings Inc
+// Licensed under the terms of the Apache version 2.0 license. See LICENSE file for terms.
+
+// RoleCertificate - a role certificate
+type RoleCertificate Struct {
+    String x509Certificate;
+}
+
+//Return a TLS certificate for a role that the principal can assume.
+//The role arn is in the CN field of the Subject and the principal
+//is in the SAN URI field.
+resource RoleCertificate POST "/rolecert" (name=PostRoleCertificateRequestExt) {
+    RoleCertificateRequest req; //csr request
+    authenticate;
+    exceptions {
+        ResourceError BAD_REQUEST;
+        ResourceError FORBIDDEN;
+        ResourceError NOT_FOUND;
+        ResourceError UNAUTHORIZED;
+    }
+}

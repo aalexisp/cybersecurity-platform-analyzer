@@ -1,0 +1,14 @@
+{
+    "Machine_name":"test2ejjejej",
+    "Username":"user",
+    "Password":"password",
+    "Host-ip":"1.1.1.1",
+    "Box-specifications":{
+        "Cpu":"2",
+        "Ram":"24864",
+        "Provider":"VM",
+        "TTL":"10",
+        "BoxIP":"2.2.2.2",
+        "Gui":"no"
+    }
+}

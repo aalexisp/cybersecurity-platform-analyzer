@@ -1,0 +1,117 @@
+// Copyright 2016 Yahoo Inc.
+// Licensed under the terms of the Apache version 2.0 license. See LICENSE file for terms.
+
+include "Names.tdl";
+
+//The representation for an enumeration of roles in the namespace, with pagination.
+type RoleList Struct {
+    Array<EntityName> names; //list of role names
+    String next (optional); //if the response is a paginated list, this attribute specifies the value to be used in the next role list request as the value for the skip query parameter.
+}
+
+//An audit log entry for role membership change.
+type RoleAuditLog Struct {
+    MemberName member; //name of the role member
+    ResourceName admin; //name of the principal executing the change
+    Timestamp created; //timestamp of the entry
+    String action; //log action - e.g. add, delete, approve, etc
+    String auditRef (optional); //audit reference string for the change as supplied by admin
+}
+
+type RoleMember Struct {
+    MemberName memberName; //name of the member
+    Timestamp expiration (optional); //the expiration timestamp
+    Timestamp reviewReminder (optional); //the review reminder timestamp
+    Bool active (optional, default=true); //Flag to indicate whether membership is active
+    Bool approved (optional, default=true); //Flag to indicate whether membership is approved either by delegates ( in case of auditEnabled roles ) or by domain admins ( in case of selfserve roles )
+    String auditRef (optional); //audit reference string for the change as supplied by admin
+    Timestamp requestTime (optional); //for pending membership requests, the request time
+    Timestamp lastNotifiedTime (optional); //for pending membership requests, time when last notification was sent
+    ResourceName requestPrincipal (optional); //pending members only - name of the principal requesting the change
+    Timestamp reviewLastNotifiedTime (optional); //for pending membership requests, time when last notification was sent (for file store)
+    Int32 systemDisabled (optional); //user disabled by system based on configured role setting
+    Int32 principalType (optional); //server use only - principal type: unknown(0), user(1), service(2), or group(3)
+}
+
+//Set of metadata attributes that all roles may have and can be changed by domain admins.
+type RoleMeta Struct {
+    Bool selfServe (optional, default=false); //Flag indicates whether or not role allows self service. Users can add themselves in the role, but it has to be approved by domain admins to be effective.
+    Int32 memberExpiryDays (optional); //all user members in the role will have specified max expiry days
+    Int32 tokenExpiryMins (optional); //tokens issued for this role will have specified max timeout in mins
+    Int32 certExpiryMins (optional); //certs issued for this role will have specified max timeout in mins
+    SimpleName signAlgorithm (optional); //rsa or ec signing algorithm to be used for tokens
+    Int32 serviceExpiryDays (optional); //all services in the role will have specified max expiry days
+    Int32 memberReviewDays (optional); //all user members in the role will have specified max review days
+    Int32 serviceReviewDays (optional); //all services in the role will have specified max review days
+    Bool reviewEnabled (optional, default=false); //Flag indicates whether or not role updates require another review and approval
+    String notifyRoles (optional); //list of roles whose members should be notified for member review/approval
+    String userAuthorityFilter (optional); //membership filtered based on user authority configured attributes
+    String userAuthorityExpiration (optional); //expiration enforced by a user authority configured attribute
+    Int32 groupExpiryDays (optional); //all groups in the domain roles will have specified max expiry days
+    Int32 groupReviewDays (optional); //all groups in the domain roles will have specified max review days
+    Map<CompoundName,StringList> tags (optional); //key-value pair tags, tag might contain multiple values
+}
+
+//The representation for a Role with set of members.
+type Role RoleMeta {
+    ResourceName name; //name of the role
+    Timestamp modified (optional); //last modification timestamp of the role
+    Array<MemberName> members (optional); //an explicit list of members. Might be empty or null, if trust is set
+    Array<RoleMember> roleMembers (optional);  //members with expiration
+    DomainName trust (optional); //a trusted domain to delegate membership decisions to
+    Array<RoleAuditLog> auditLog (optional); //an audit log for role membership changes
+    Bool auditEnabled (optional, default=false); //Flag indicates whether or not role updates should require GRC approval. If true, the auditRef parameter must be supplied(not empty) for any API defining it
+    Timestamp lastReviewedDate (optional); //last review timestamp of the role
+}
+
+//The representation for a list of roles with full details
+type Roles Struct {
+    Array<Role> list; // list of role objects
+}
+
+//The representation for a role membership.
+type Membership Struct {
+    MemberName memberName; //name of the member
+    Bool isMember (optional, default=true); //flag to indicate whether or the user is a member or not
+    ResourceName roleName (optional); //name of the role
+    Timestamp expiration (optional); //the expiration timestamp
+    Timestamp reviewReminder (optional); //the review reminder timestamp
+    Bool active (optional, default=true); //Flag to indicate whether membership is active
+    Bool approved (optional, default=true); //Flag to indicate whether membership is approved either by delegates ( in case of auditEnabled roles ) or by domain admins ( in case of selfserve roles )
+    String auditRef (optional); //audit reference string for the change as supplied by admin
+    ResourceName requestPrincipal (optional); //pending members only - name of the principal requesting the change
+    Int32 systemDisabled (optional); //user disabled by system based on configured role setting
+}
+
+//The list of domain administrators.
+type DefaultAdmins Struct {
+    Array<ResourceName> admins; //list of domain administrators
+}
+
+type MemberRole Struct {
+    ResourceName roleName; //name of the role
+    DomainName domainName (optional); //name of the domain
+    MemberName memberName (optional); //name of the member
+    Timestamp expiration (optional); //the expiration timestamp
+    Timestamp reviewReminder (optional); //the review reminder timestamp
+    Bool active (optional, default=true); //Flag to indicate whether membership is active
+    String auditRef (optional); //audit reference string for the change as supplied by admin
+    EntityName requestPrincipal (optional); //pending members only - name of the principal requesting the change
+    Timestamp requestTime (optional); //for pending membership requests, the request time
+    Int32 systemDisabled (optional); //user disabled by system based on configured role setting
+}
+
+type DomainRoleMember Struct {
+    MemberName memberName; //name of the member
+    Array<MemberRole> memberRoles; // roles for this member
+}
+
+type DomainRoleMembers Struct {
+    DomainName domainName; //name of the domain
+    Array<DomainRoleMember> members; //role members
+}
+
+//Set of system metadata attributes that all roles may have and can be changed by system admins.
+type RoleSystemMeta Struct {
+    Bool auditEnabled (optional, default=false); //Flag indicates whether or not role updates should be approved by GRC. If true, the auditRef parameter must be supplied(not empty) for any API defining it.
+}
