@@ -1,4 +1,0 @@
-type C Struct {
-  String cfield
-}
-

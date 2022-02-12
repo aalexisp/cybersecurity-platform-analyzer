@@ -1,9 +1,0 @@
-ci:
-  tests:
-    removed: fail
-    deprecated: warn
-    unmaintained: warn
-    unlicensed: warn
-    outdated: warn
-    vulnerable: fail
-    inactive_stream: fail
