@@ -1,0 +1,33 @@
+[
+{
+    "Machine_name": "idk",
+    "Username":"login_username",
+    "Password":"login_password",
+    "HostIP":"Host-ip",
+    "BoxSpecifications": {
+        "CPU":"Cpu",
+        "RAM":"Ram",
+        "Provider":"Provider",
+        "TTL":"Ttl",
+        "BoxIP":"Box-ip",
+        "Gui":true
+    },
+   "Hello":"hellllo" 
+},
+{
+    "Machine_name": "tina",
+    "Username":"login_username",
+    "Password":"login_password",
+    "HostIP":"Host-ip",
+    "BoxSpecifications": {
+        "CPU":"Cpu",
+        "RAM":"Ram",
+        "Provider":"Provider",
+        "TTL":"Ttl",
+        "BoxIP":"Box-ip",
+        "Gui":true
+
+    },
+    "Hello":"hellllooo"
+}
+]
